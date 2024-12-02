@@ -1,0 +1,7 @@
+use std::read_to_string
+
+fn main() {
+    day1::part1(read_to_string("res/day1.txt"))
+    day1::part2(read_to_string("res/day1.txt"))
+    day2::part1(read_to_string("res/day2.txt"))
+}

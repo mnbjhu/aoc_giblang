@@ -1,0 +1,68 @@
+use std::String
+use std::Bool
+use day1::range
+use day1::abs
+use day1::WhitespaceMatcher
+use std::Option
+use std::Option::Some
+use std::Option::None
+use std::Vec
+use std::println
+use std::print
+
+fn part1(input: String) {
+    let count = 0
+    for line in input.lines() {
+        if is_safe(line) {
+            count = count + 1
+        }
+    }
+    println(count)
+}
+
+fn is_safe(line: String): Bool {
+    let last = 0
+    let report_type = ReportType::Unknown
+    let iter = line.split(WhitespaceMatcher)
+    while let Some(num) = iter.next() {
+        let n = num.to_int().unwrap()
+        if last == 0 {
+            last = n
+        } else {
+            let diff = n - last
+            last = n
+            let abs_dif = abs(diff)
+            if abs_dif < 1 || abs_dif > 3 {
+                return false
+            }
+            match report_type {
+                ReportType::Unknown => {
+                    if diff > 0 {
+                        report_type = ReportType::Increasing
+                    } else if diff < 0 {
+                        report_type = ReportType::Decreasing
+                    } else {
+                        return false
+                    }
+                },
+                ReportType::Increasing => {
+                    if diff < 0 {
+                        return false
+                    }
+                },
+                ReportType::Decreasing => {
+                    if diff > 0 {
+                        return false
+                    }
+                }
+            }
+        }
+    }
+    true
+}
+
+enum ReportType {
+    Increasing,
+    Decreasing,
+    Unknown
+}

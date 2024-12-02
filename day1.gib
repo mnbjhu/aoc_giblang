@@ -1,0 +1,295 @@
+use std::String
+use std::Bool
+use std::Char
+use std::Int
+use std::Vec
+use std::Iterator
+use std::Option
+use std::Option::None
+use std::Option::Some
+use std::IntoIter
+use std::print
+use std::println
+
+fn part1(input: String) {
+    let first = Vec::new()
+    let second = Vec::new()
+    for line in input.lines() {
+        let parts = line.split(WhitespaceMatcher)
+        let a = parts.next().unwrap().to_int().unwrap()
+        let b = parts.next().unwrap().to_int().unwrap()
+        first.push(a)
+        second.push(b)
+    }
+    let count = 0
+    first.sort()
+    second.sort()
+    for i in range(0, first.len()) {
+        count = count + abs(second.get(i) - first.get(i))
+    }
+    println(count)
+}
+
+fn part2(input: String) {
+    let first = Vec::new()
+    let second = Vec::new()
+    for line in input.lines() {
+        let parts = line.split(WhitespaceMatcher)
+        let a = parts.next().unwrap().to_int().unwrap()
+        let b = parts.next().unwrap().to_int().unwrap()
+        first.push(a)
+        second.push(b)
+    }
+    let count = 0
+    let iter = first.iter()
+    while let Some(num) = iter.next() {
+        let occurences = 0
+        for other in second {
+            if num == other {
+                occurences = occurences + 1
+            }
+        }
+        let sim_score = occurences * num
+        count = count + sim_score
+    }
+    println(count)
+}
+
+struct VecIter[T] {
+    vec: Vec[T],
+    index: Int
+}
+
+impl[T] Iterator[T] for VecIter[T] {
+    fn Self.next(): Option[T] {
+        if index >= vec.len() {
+            return None
+        }
+        let res = Some(vec.get(index))
+        index = index + 1
+        res
+    }
+}
+
+impl[T] IntoIter[VecIter[T]] for Vec[T] {
+    fn Self.iter(): VecIter[T] {
+        VecIter(self, 0)
+    }
+}
+
+fn abs(x: Int): Int {
+    if x < 0 {
+        0 - x
+    } else {
+        x
+    }
+}
+
+struct RangeIter {
+    index: Int,
+    end: Int
+}
+
+struct Range(Int, Int)
+
+impl Iterator[Int] for RangeIter {
+    fn Self.next(): Option[Int] {
+        if index >= end {
+            return None
+        }
+        let res = Some(index)
+        index = index + 1
+        res
+    }
+}
+
+fn range(start: Int, end: Int): Range {
+    Range(start, end)
+}
+
+impl IntoIter[RangeIter] for Range {
+    fn Self.iter(): RangeIter {
+        let Range(start, end) = self
+        RangeIter(start, end)
+    }
+}
+
+impl Vec[Int] {
+    fn Self.sort() {
+        let len = self.len()
+        let i = 0
+        while i < len {
+            let j = i + 1
+            while j < len {
+                if self.get(i) > self.get(j) {
+                    let tmp = self.get(i)
+                    self.set(i, self.get(j))
+                    self.set(j, tmp)
+                }
+                j = j + 1
+            }
+            i = i + 1
+        }
+    }
+}
+
+impl Char {
+    fn Self.to_int(): Option[Int] {
+        match self {
+            '0' => Some(0),
+            '1' => Some(1),
+            '2' => Some(2),
+            '3' => Some(3),
+            '4' => Some(4),
+            '5' => Some(5),
+            '6' => Some(6),
+            '7' => Some(7),
+            '8' => Some(8),
+            '9' => Some(9),
+            _ => None
+        }
+    }
+}
+
+impl String {
+    fn Self.to_int(): Option[Int] {
+        let res = 0
+        let iter = self.iter()
+        while let Some(c) = iter.next() {
+            match c.to_int() {
+                Some(x) => {
+                    res = res * 10 + x
+                },
+                _ => {
+                    print("Found: '")
+                    print(c)
+                    println("'")
+                    return None
+                }
+            }
+        }
+        Some(res)
+    }
+}
+
+struct StrIter {
+    text: String,
+    index: Int
+}
+
+impl Iterator[Char] for StrIter {
+    fn Self.next(): Option[Char] {
+        if index >= text.len() {
+            return None
+        }
+        let res = Some(text.get(index))
+        index = index + 1
+        res
+    }
+}
+
+impl IntoIter[StrIter] for String {
+    fn Self.iter(): StrIter {
+        StrIter(self, 0)
+    }
+}
+
+impl[T] Option[T] {
+    fn Self.unwrap(): T {
+        match self {
+            Some(x) => x,
+            None => std::panic("unwrap called on None")
+        }
+    }
+}
+
+struct LinesIter {
+    text: String,
+    index: Int
+}
+
+trait CharMatcher {
+    fn Self.matches(c: Char): Bool
+}
+
+struct WhitespaceMatcher
+
+impl CharMatcher for WhitespaceMatcher {
+    fn Self.matches(c: Char): Bool {
+        c == ' ' || c == '\t' || c == '\n'
+    }
+}
+
+struct SplitIter {
+    by_condition: CharMatcher,
+    index: Int,
+    text: String
+}
+
+impl Iterator[String] for SplitIter {
+    fn Self.next(): Option[String] {
+        let start = index
+        let len = text.len()
+        let found = ""
+        if let None = text.try_get(index) {
+            return None
+        }
+        while let Some(c) = text.try_get(index) {
+            if by_condition.matches(c) {
+                break
+            }
+            index = index + 1
+        }
+        let res = Some(text.slice(start, index))
+        let end = index
+        while let Some(c) = text.try_get(index) {
+            if !by_condition.matches(c) {
+                break
+            }
+            index = index + 1
+        }
+        res
+    }
+}
+
+impl String {
+    fn Self.try_get(index: Int): Option[Char] {
+        if index >= 0 && index < self.len() {
+            Some(self.get(index))
+        } else {
+            None
+        }
+    }
+    fn Self.split(by_condition: CharMatcher): SplitIter {
+        SplitIter(by_condition, 0, self)
+    }
+}
+
+impl Iterator[String] for LinesIter {
+    fn Self.next(): Option[String] {
+        let start = index
+        let len = text.len()
+        let res = None
+        while index < len {
+            if text.get(index) == '\n' {
+                res = Some(text.slice(start, index))
+                index = index + 1
+                break
+            }
+            index = index + 1
+        }
+        res
+    }
+}
+
+impl String {
+    fn Self.lines(): LinesIter {
+        LinesIter(self, 0)
+    }
+}
+
+impl IntoIter[LinesIter] for LinesIter {
+    fn Self.iter(): LinesIter {
+        self
+    }
+}
